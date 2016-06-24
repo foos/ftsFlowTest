@@ -1,0 +1,19 @@
+{
+  "name": "ftsflowtesting",
+  "version": "1.0.0",
+  "description": "To test and verify values of FTS flow data retrieved by hpc tools api.",
+  "main": "index.js",
+  "dependencies": {
+    "bl": "^1.1.2"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-eslint": "^18.1.0",
+    "bl" : "^1.1.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sean Foo",
+  "license": "ISC"
+}
