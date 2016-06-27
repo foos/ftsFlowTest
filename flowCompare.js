@@ -27,9 +27,10 @@ if(isNaN(appealId)){
   throw ("Invalid appeal id");
 }
 
+var outputFilepath = 'c:/users/foo/work/temp/test/'; 
+
 var uContributions1 = `http://fts.unocha.org/api/v1/funding.json?appeal=${appealId}&groupby=donor`;
 var uContributions2 = `http://fts.unocha.org/api/v1/funding.json?appeal=${appealId}&groupby=recipient`;
-
 var uAppeal = `http://fts.unocha.org/api/v1/appeal/id/${appealId}.json`;
 
 var uPlan = `http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/flow/reports/plan/${planId}`;
@@ -51,10 +52,10 @@ var p1 = oPlanReport.getAPIData()
   let a2 = readReport(jdata);
   oPlanReport.processedData = [a1,a2];
   
-  fs.writeFile(`c:/users/foo/work/temp/test/testCategory${planId}.json`,JSON.stringify(a1), (err)=>{
+  fs.writeFile(`${outputFilepath}testCategory${planId}.json`,JSON.stringify(a1), (err)=>{
     if(err){ console.error(err);}
   });
-  fs.writeFile(`c:/users/foo/work/temp/test/testReport${planId}.json`,JSON.stringify(a2), (err)=>{
+  fs.writeFile(`${outputFilepath}testReport${planId}.json`,JSON.stringify(a2), (err)=>{
     if(err){ console.error(err);}
   });
 
@@ -107,7 +108,7 @@ Promise.all([p1,p2,p3,p4])
   
   console.log("=== by Recipient ultimate ===");
   console.log(compareRep1(values[0][1][2], values[3]));
-  
+
   // console.log(aryspecial);
 
 })
