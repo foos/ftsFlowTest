@@ -13,6 +13,7 @@
 "use strict";
 var dto = require("./dto.js");
 var fs = require("fs");
+var config = require("./config.js");
 
 // let the user specify the plan id
 var planId = process.argv[2];
@@ -27,13 +28,13 @@ if(isNaN(appealId)){
   throw ("Invalid appeal id");
 }
 
-var outputFilepath = 'c:/users/foo/work/temp/test/'; 
+var outputFilepath = config.outputPath; 
 
-var uContributions1 = `http://fts.unocha.org/api/v1/funding.json?appeal=${appealId}&groupby=donor`;
-var uContributions2 = `http://fts.unocha.org/api/v1/funding.json?appeal=${appealId}&groupby=recipient`;
-var uAppeal = `http://fts.unocha.org/api/v1/appeal/id/${appealId}.json`;
+var uContributions1 = config.url_ftspai + `funding.json?appeal=${appealId}&groupby=donor`;
+var uContributions2 = config.url_ftspai + `funding.json?appeal=${appealId}&groupby=recipient`;
+var uAppeal = config.url_ftspai + `appeal/id/${appealId}.json`;
 
-var uPlan = `http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/flow/reports/plan/${planId}`;
+var uPlan = config.url_hpcapi + `flow/reports/plan/${planId}`;
 
 //var uPlan01 = "http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/plan?filter=false";
 //var uapiFlow01 = "http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/flow/reports/plan/";

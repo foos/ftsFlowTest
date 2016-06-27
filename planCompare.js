@@ -1,6 +1,7 @@
 "use strict";
 var dto = require("./dto.js");
 var fs = require("fs");
+var config = require("./config.js");
 
 // let the user specify the year
 var year = process.argv[2];
@@ -8,14 +9,16 @@ if(isNaN(year)){
   console.error("Invalid year");
   throw ("Invalid year");
 }
-var outputfilePath = `c:/users/foo/work/temp/test${year}.json`;
 
-var uAppeal = `http://fts.unocha.org/api/v1/appeal/year/${year}.json`;
-var uPlan = `http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/flow/plan/overview/snapshot/${year}`;
+
+console.log(config.url_ftsapi);
+
+var outputfilePath = config.localfileOutputPath + `test${year}.json`;
+var uAppeal = config.url_ftsapi + `appeal/year/${year}.json`;
+var uPlan = config.url_hpcapi + `flow/plan/overview/snapshot/${year}`;
 
 //var uPlan01 = "http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/plan?filter=false";
-//var uapiFlow01 = "http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/flow/reports/plan/";
-//var uapiClassic = "http://fts.unocha.org/api/v1/appeal/id/1123.json";
+
 
 console.log("Start:");
 
