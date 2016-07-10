@@ -10,9 +10,6 @@ if(isNaN(year)){
   throw ("Invalid year");
 }
 
-
-console.log(config.url_ftsapi);
-
 var outputfilePath = config.localfileOutputPath + `test${year}.json`;
 var uAppeal = config.url_ftsapi + `appeal/year/${year}.json`;
 var uPlan = config.url_hpcapi + `flow/plan/overview/snapshot/${year}`;

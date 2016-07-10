@@ -6,8 +6,6 @@
  * Construct the classic URL and read it
  * Loop over group by organisation values and compare against totals
  * 
- * TEST: 388 and 950 = Sudan 2012 on dev
- * 
  */
 
 "use strict";
@@ -28,13 +26,14 @@ if(isNaN(appealId)){
   throw ("Invalid appeal id");
 }
 
-var outputFilepath = config.outputPath; 
+var outputFilepath = config.localfileOutputPath; 
 
-var uContributions1 = config.url_ftspai + `funding.json?appeal=${appealId}&groupby=donor`;
-var uContributions2 = config.url_ftspai + `funding.json?appeal=${appealId}&groupby=recipient`;
-var uAppeal = config.url_ftspai + `appeal/id/${appealId}.json`;
+var uContributions1 = config.url_ftsapi + `funding.json?appeal=${appealId}&groupby=donor`;
+var uContributions2 = config.url_ftsapi + `funding.json?appeal=${appealId}&groupby=recipient`;
+var uAppeal = config.url_ftsapi + `appeal/id/${appealId}.json`;
 
 var uPlan = config.url_hpcapi + `flow/reports/plan/${planId}`;
+
 
 //var uPlan01 = "http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/plan?filter=false";
 //var uapiFlow01 = "http://service.stage.hpc.568elmp02.blackmesh.com/v0/fts-beta/flow/reports/plan/";
@@ -85,7 +84,7 @@ var p3 = oAppealFundingByDonor.getAPIData()
   return jdata.grouping;
 });
 
-// get total by donor
+// get total by recipient
 var oAppealFundingByRecipient = new dto.sourceAPI(uContributions2);
 var p4 = oAppealFundingByRecipient.getAPIData()
 .then((jdata)=>{
