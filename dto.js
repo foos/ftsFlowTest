@@ -32,8 +32,22 @@ exports.mapAppealToPlan = function(AppealId, PlanId){
  * simple flow data object
  */
 exports.flowSimple = function(flow){
-  this.id = flow.id;
-  this.amountUSD = flow.amountUSD;
+
+  var o = {};
+
+  o.id = flow.id;
+  o.amountUSD = flow.amountUSD;
+  o.flowDate = flow.flowDate;
+  o.decisionDate = flow.decisionDate;
+  o.firstReportedDate = flow.firstReportedDate;
+  o.budgetYear = flow.budgetYear;
+  o.origAmount = flow.origAmount;
+  o.origCurrency = flow.origCurrency;
+  o.exchangeRate = flow.exchangeRate;
+  o.restricted = flow.restricted;
+  o.description = flow.description;
+  o.createdAt = flow.createdAt;
+  o.updatedAt = flow.updatedAt;
 
   // loop over array and add dynamic properties to this object
   /*
@@ -46,13 +60,25 @@ exports.flowSimple = function(flow){
   */
 
   // loop over array and add dynamic properties to this object
+  
   if(flow.categories != null){
   for(let i=0; i<flow.categories.length; i++){
     let item = flow.categories[i];
-    this[item.group] = item.name;
+    o[item.group] = item.name;
     } 
   }
+
+  if(flow.emergencies != undefined){
+    o.emergencies = flow.emergencies[0].name;
+    o.emergenciesDirection = flow.emergencies[0].flowObject.refDirection;
+  }
+
+  if(flow.usageYears != undefined){
+    o.usageYears = flow.usageYears[0].year;
+    o.usageYearsDirection = flow.usageYears[0].flowObject.refDirection;
+  }
   
+  return o;
 }
 
 

@@ -48,7 +48,7 @@ var p1 = oPlanReport.getAPIData()
 .then((jdata)=>{
   howlong("p1");
   oPlanReport.jdata = jdata;
-  let a1 = readCategories(jdata); 
+  let a1 = readCategories(jdata);   
   let a2 = readReport(jdata);
   oPlanReport.processedData = [a1,a2];
   
