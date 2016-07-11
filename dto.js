@@ -59,25 +59,48 @@ exports.flowSimple = function(flow){
   }
   */
 
+  o.addProperty = function(flowProperty, propertyName){
+    if(flow[flowProperty] !== undefined && flow[flowProperty].length > 0){
+      let aryProp = [];
+      let pn = (propertyName == null) ? "name" : propertyName;
+      for(let i = 0; i< flow[flowProperty].length; i++){
+        let op = {};
+        op.value = flow[flowProperty][i][pn];
+        op.direction = flow[flowProperty][i].flowObject.refDirection;
+        aryProp.push(op);
+      }
+      this[flowProperty] = aryProp;
+    }
+  }
+
+
   // loop over array and add dynamic properties to this object
   
-  if(flow.categories != null){
+  if(flow.categories !== null && flow.categories.length > 0){
   for(let i=0; i<flow.categories.length; i++){
     let item = flow.categories[i];
     o[item.group] = item.name;
     } 
   }
 
-  if(flow.emergencies != undefined){
+  /*
+  if(flow.emergencies !== undefined && flow.emergencies.length > 0){
     o.emergencies = flow.emergencies[0].name;
     o.emergenciesDirection = flow.emergencies[0].flowObject.refDirection;
   }
+  */
 
-  if(flow.usageYears != undefined){
-    o.usageYears = flow.usageYears[0].year;
-    o.usageYearsDirection = flow.usageYears[0].flowObject.refDirection;
-  }
-  
+  o.addProperty("emergencies");
+  o.addProperty("plans");
+  o.addProperty("projects","code");
+  o.addProperty("usageYears","year");
+  o.addProperty("globalClusters");
+  o.addProperty("locations");
+  o.addProperty("organizations");
+  o.addProperty("clusters");
+
+  o.legacyId = flow.legacy.legacyId;
+
   return o;
 }
 

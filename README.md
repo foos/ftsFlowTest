@@ -4,7 +4,7 @@ This command line app is to automate the checking of results from the flow API e
 
 From the command line, just call the file directly with arguments.
 
-e.g.
+Here are the available node scripts to run
  ```
 node planCompare.js 2013
 
@@ -13,7 +13,13 @@ node planCompare.js 2013
  Then with the values from this output
 
  ```
-node flowCompare.js 851 954
+node reportCompare.js 851 954
  ```
 
- Note that there are file paths to be configured in the files itself.
+Then to do a standard check of a set of flows
+```
+node flowCompare.js
+```
+
+
+ Note that there is an output file path for local environments to be configured in the config.js itself.
