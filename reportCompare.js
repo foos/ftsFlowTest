@@ -1,13 +1,10 @@
-/*
- * Specify the Flow Plan ID and the Appeal ID 
- * Construct the flow URL and read it  
- * Loop over it and then construct the simple view
+/**
+ * This is to check the report end points from the FTS beta 
+ * against the classic API funding values grouped by donor and recipient
  * 
- * Construct the classic URL and read it
- * Loop over group by organisation values and compare against totals
+ * Call from node.js console pass in FlowPlanID and AppealID 
  * 
  */
-
 "use strict";
 var dto = require("./dto.js");
 var fs = require("fs");
@@ -52,6 +49,7 @@ var p1 = oPlanReport.getAPIData()
   let a2 = readReport(jdata);
   oPlanReport.processedData = [a1,a2];
   
+  // output the simplified categories and report into a file for reference
   fs.writeFile(`${outputFilepath}testCategory${planId}.json`,JSON.stringify(a1), (err)=>{
     if(err){ console.error(err);}
   });
@@ -95,21 +93,29 @@ var p4 = oAppealFundingByRecipient.getAPIData()
 
 
 
-// when all three are done, do this next
+// when all are done, output to screen so can see the values.
 Promise.all([p1,p2,p3,p4])
 .then(values=>{
-  console.log(values[1].title);
-  console.log(compareTotalRep1(values[0][0], values[1]));
-
-  console.log(compareRep1(values[0][1][0], values[2]));
-
-  console.log("=== by Recipient immediate ===");
-  console.log(compareRep1(values[0][1][1], values[3]));
   
-  console.log("=== by Recipient ultimate ===");
-  console.log(compareRep1(values[0][1][2], values[3]));
+  let res = {};
 
-  // console.log(aryspecial);
+  // first test the total values
+  res.title = values[1].title;
+  res.TestTotal = compareTotalRep1(values[0][0], values[1]); 
+
+  // then compare report 1 against expected values
+  res.TestReport1_Donor = compareReportValues(values[0][1][0], values[2]);
+
+  // compare report 2 against expected values
+  res.TestReport2_Immediate = compareReportValues(values[0][1][1], values[3]);
+  
+  // compare report 3 against expected values
+  res.TestReport3_Ultimate = compareReportValues(values[0][1][2], values[3]);
+
+  console.log(res);
+  fs.writeFile(`${outputFilepath}${res.title}.json`,JSON.stringify(res), (err)=>{
+    if(err){ console.error(err);}
+  });
 
 })
 .then(()=>{
@@ -124,31 +130,33 @@ Promise.all([p1,p2,p3,p4])
 
 /**
  * function to compare the appeal totals first
+ * 
+ * @returns {JSON} json object of results
  */
 function compareTotalRep1(flowData, classicData){
   var r1 = flowData[0].sum;
   var r2 = classicData.funding;
-  var s = `Flow total = ${r1} and classic total = ${r2}`;
+  var s = {"FlowTotal": r1, "ClassicTotal": r2};
   var diff = Number(r1) - Number(r2);
   if(diff != 0 ){
-    s += ' FAIL! Diff=' + diff.toString();
+    s.check = 'FAIL!';
+    s.Diff= diff;
   }
   else{
-    s += ' OK! ';
+    s.check = 'OK!';
   }
-  
   return s;
 }
 
 /**
- * function to compare reports 1 and 2
+ * function to compare reports against classic data
  * 
  * @param {Array} flowData - this is the processed reports array, apecify the correct item
  * @param {Array} classicData - part of the classic api output 
- * 
+ * @returns {JSON} json object of results
  */
-function compareRep1(flowData, classicData){
-  var report1 = flowData.map(item=>{
+function compareReportValues(flowData, classicData){
+  var orgListNames = flowData.map(item=>{
      let o = item;
      o.name = o.name.replace(', Government of',""); // remove the extra string for donors
      return o;
@@ -159,8 +167,8 @@ function compareRep1(flowData, classicData){
   var fail = 0;
   var sanitycheck = 0;
 
-  // loop over and compare the names of the source/destination organisations
-  report1.forEach(item=>{
+  // loop over and match the names of the source/destination organisations to compare values
+  orgListNames.forEach(item=>{
 
     var o = new Object();
     o.flowSide = item.name;
@@ -193,8 +201,8 @@ function compareRep1(flowData, classicData){
   var arynotfound = [];
   classicData.forEach(item=>{
     let b = 0;
-    for(let i=0; i<report1.length; i++){
-      if(item.type === report1[i].name){
+    for(let i=0; i<orgListNames.length; i++){
+      if(item.type === orgListNames[i].name){
         b++;
       }
     }
@@ -264,12 +272,6 @@ function readReport(data){
       let f =  Number(flow.amountUSD);
       total += f;
 
-      //SPECIAL CASE
-      //if(i.includes('America')){
-      //  specialRead1(flow);
-      //}
-      
-
     });
     o.total = total;
     res1.push(o);   
@@ -311,20 +313,6 @@ function readReport(data){
   ary.push(res2);
   ary.push(res3);
   ary.push(res4);
-
-  
-  /*
-  data.summary.reports.report1.forEach((item,index)=>{
-    let o = new Object;
-    o.name = index;
-    let total = 0;
-    item.forEach((flow)=>{
-      total += flow.amountUSD;
-    });
-    o.total = total;
-    ary.push(o);
-  });  
-  */ 
   
   return ary;
 }
@@ -349,25 +337,6 @@ function getFlowId(data){
 
 
 /**
-* function to get a simplified key value pair of categories for an array of categories.
-*
-* @param {Array} aryData - This is an array of flow objects
-* @return {Array} array of source/destination values
-*/
-function getSimpleSourceDestination(aryData){
-  var aryFlat = [];
-  aryData.forEach( (item, index, ary) =>{
-    var obj = new Object;
-    let key = item.objectType + "-" + item.refDirection;
-    obj[key] = item.objectID ;  // no value!
-    aryFlat.push(obj);
-  });
-  return aryFlat;
-}
-
-
-
-/**
  *  to read the classic api for appeal/id/###.json for appeal funding
  * 
  *  @param {JSON} jdata - this is the output from the classic API
@@ -380,20 +349,5 @@ function getClassicAppeal(jdata){
   op.reqirements = item.current_requirements;
 
   return op;
-}
-
-/**
- * special case
- */
-var aryspecial = [];
-function specialRead1(flow){
-
-  // == special case ==
-  var so = new dto.flowSimple(flow);
-
-  var d = {id : so.id, amountUSD : flow.amountUSD};
-  aryspecial.push(d);
-
-
 }
 

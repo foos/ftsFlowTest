@@ -30,7 +30,7 @@ console.log("start");
 var oContribution = new dto.sourceAPI(urlcontri + emergencyId + ".json");
 var p0 = oContribution.getAPIData()
 .then(jdata=>{
-  po.jdata = jdata;
+  oContribution.jdata = jdata;
   jdata.forEach(element=>{ // just get the contribution id's into an array
     aryContributions.push(element.id);
   });
@@ -38,7 +38,7 @@ var p0 = oContribution.getAPIData()
   console.log("length = " + aryContributions.length);
   
   // now throttle process the array of contribution id's
-  throttle(aryContributions,0,50);
+  throttle(aryContributions,0,25);
 
 })
 .catch(function(err){
@@ -80,12 +80,18 @@ function throttle(ary, start, batchsize){
   // process the current batch
   var P = processFlows(lary);
   P.then(()=>{
-    if(current === tlength){ // if last batch and no more to process
+    if(current === tlength){ // if last batch and no more to process then output
+
       console.log("output " + aryResults.length);
       fs.writeFile(outputFilepath,JSON.stringify(aryResults), (err)=>{
           if(err){ console.error(err);}
       });
+
+      let comparison = compare(oContribution.jdata, aryResults);
+      console.dir(comparison);
+
       return true;
+
     }
     else{ // recursive call to next batch
       throttle(ary,current,batchsize);
@@ -94,7 +100,6 @@ function throttle(ary, start, batchsize){
   });
 
 }
-
 
 
 
@@ -125,4 +130,66 @@ function processFlows(aryFlows){
   // when all the promises are done then output results
   return Promise.all(aryP);
 }
+
+
+
+/**
+ * To loop over the outputs from the Classic API and compare against the output from the HPC service
+ * @param {array} aryClassic - the classic API output
+ * @param {array} aryHPC - the processed output from HPC
+ */
+function compare(aryClassic, aryHPC){
+
+  var results = [];
+
+  var compareProperty = function(classic, hpc){
+    return (classic == hpc);
+  }
+
+  // for each classic element, check the equivalent HPC
+  aryClassic.forEach((classicElement)=>{  
+
+    let r = {};
+    r.classicId = classicElement.id;
+
+    let match = aryHPC.find((hpcElement)=>{
+      return hpcElement.legacyId === classicElement.id;
+    });
+    if(match == undefined){
+      r.flowId = null; // not found, return!
+      return;
+    }
+    
+    // now assign values and compare each
+    r.flowId = match.id;
+    r.check_amount = compareProperty(classicElement.amount, match.amountUSD);
+
+    // loop over properties of the classic and check on the hpc
+    var classicProperties = Object.getOwnPropertyNames(classicElement);
+    classicProperties.forEach((classicProperty)=>{
+      let hpcProperty = mapping[classicProperty];
+      if(hpcProperty == undefined){return;}
+      if(classicElement[classicProperty] == match[hpcProperty]){
+        r[classicProperty] = true;
+      }
+      else{
+        if(classicElement[classicProperty] == "" && match[hpcProperty] == null){
+          r[classicProperty] = true;
+        }
+        else{
+           r[classicProperty] = `${classicElement[classicProperty]} != ${match[hpcProperty]}`;
+        }
+      }
+    });
+
+    results.push(r);
+  });
+
+  return results;
+}
+
+var mapping = [];
+mapping["amount"] = "amountUSD";
+//mapping["decision_date"] = "decisionDate";
+mapping["original_currency_amount"] = "origAmount";
 

@@ -1,3 +1,9 @@
+/**
+ * this is to compare the totals of appeals vs plans from the classic API to the service API
+ * 
+ * call this from node.js console passing in a year 
+ *  
+ */
 "use strict";
 var dto = require("./dto.js");
 var fs = require("fs");

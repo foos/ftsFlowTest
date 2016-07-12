@@ -48,6 +48,7 @@ exports.flowSimple = function(flow){
   o.description = flow.description;
   o.createdAt = flow.createdAt;
   o.updatedAt = flow.updatedAt;
+  o.legacyId = flow.legacy.legacyID;
 
   // loop over array and add dynamic properties to this object
   /*
@@ -59,6 +60,7 @@ exports.flowSimple = function(flow){
   }
   */
 
+  // mini function to process the attached objects
   o.addProperty = function(flowProperty, propertyName){
     if(flow[flowProperty] !== undefined && flow[flowProperty].length > 0){
       let aryProp = [];
@@ -98,8 +100,6 @@ exports.flowSimple = function(flow){
   o.addProperty("locations");
   o.addProperty("organizations");
   o.addProperty("clusters");
-
-  o.legacyId = flow.legacy.legacyId;
 
   return o;
 }
