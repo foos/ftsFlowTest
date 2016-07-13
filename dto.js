@@ -77,11 +77,10 @@ exports.flowSimple = function(flow){
 
 
   // loop over array and add dynamic properties to this object
-  
   if(flow.categories !== null && flow.categories.length > 0){
-  for(let i=0; i<flow.categories.length; i++){
-    let item = flow.categories[i];
-    o[item.group] = item.name;
+    for(let i=0; i<flow.categories.length; i++){
+      let item = flow.categories[i];
+      o[item.group] = item.name;
     } 
   }
 
@@ -100,6 +99,14 @@ exports.flowSimple = function(flow){
   o.addProperty("locations");
   o.addProperty("organizations");
   o.addProperty("clusters");
+
+  if(flow.children !== null && flow.children.length > 0){
+    o.children = [];
+    for(let i=0; i<flow.children.length; i++){
+      let item = flow.children[i];
+       o.children.push(item.childID);
+    } 
+  }
 
   return o;
 }
