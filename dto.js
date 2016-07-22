@@ -208,16 +208,16 @@ exports.createFullMapping = function(sourceflow, sourceclassic){
   for(let i = 0; i<isfl; i++){
     // create the mapped object first with plan id
   
-    var omapped = new this.mapAppealToPlan(0, sourceflow[i].id); 
-    let appealfound = 0;
+    let omapped = new this.mapAppealToPlan(0, sourceflow[i].id); 
+    let appealfound = undefined;
     for(let j = 0; j<iscl; j++){      
       // if matching appeal title found, add it to the mapped object
-      if(sourceflow[i].title == sourceclassic[j].title){ 
+      if(sourceflow[i].title === sourceclassic[j].title){ 
         appealfound = j;
         omapped.AppealId = sourceclassic[j].id;
       }      
     }
-    if(appealfound == 0){
+    if(appealfound === undefined){ 
       aryFull.push(new this.matrixRow(undefined, sourceflow[i]));
     }
     else{
