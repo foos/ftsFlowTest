@@ -13,7 +13,9 @@ var urlFlow = config.url_hpcapi + "flow/id/";
 
 // get all flow id's from custom search API 
 // get legacy contribution id's from list of flow id's
-var customurl = "http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?year=2014&organizationabbrev=UNICEF&limit=100000";
+var customurl = "http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?planid=938&limit=10000";
+
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?year=2014&organizationabbrev=UNICEF&limit=100000";
 
 //"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?year=2014,2015"; 
 //"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?planid=914";
@@ -64,18 +66,27 @@ customAPI(customurl)
 
     /* special  to view specific types of flows */
     let tem = [];
-    let aryContributions = ele.data.flows.map((obj)=>{
-      //if(obj.boundary === "incoming"){
+    ele.data.flows.forEach((obj)=>{
+      if(obj.boundary === "incoming"){
       // get the original values from the api
-        let v = {flowid: Number(obj.id), boundary: obj.boundary, amt: obj.amountUSD};
-      
-        obj.sourceObjects.forEach((e)=>{ if(e.type==="Location" && e.name === "Japan" ){ v.s = e.name; } });
-        obj.destinationObjects.forEach((e)=>{ if(e.type==="Location" ){ v.d =  e.name; } });
-        if(v.s !== undefined){
-          tem.push(v);
+        
+        //let v = {flowid: Number(obj.id), boundary: obj.boundary, amt: obj.amountUSD};
+        //obj.sourceObjects.forEach((e)=>{ if(e.type==="Location" && e.name === "Japan" ){ v.s = e.name; } });
+        //obj.destinationObjects.forEach((e)=>{ if(e.type==="Location" ){ v.d =  e.name; } });
+        //if(v.s !== undefined){
+        //  tem.push(v);
+       // //}
+
+        let forg = false;
+        obj.sourceObjects.forEach((e)=>{ 
+          if(e.type==="Organization" ){ forg=true; } 
+        });
+        if(!forg){
+          tem.push({flowid: Number(obj.id), boundary: obj.boundary, amt: obj.amountUSD});
         }
-      return v;
-      //}
+
+        //return v;
+      }
     });
     
 
@@ -92,8 +103,13 @@ customAPI(customurl)
     });
     console.log(`total=${total} and out=${out} and remainder =${total-out} ` ); */
 
+      
     console.log(tem);
-    console.log(tem.length);   
+    let t = 0;
+    tem.forEach((d)=>{
+      t += d.amt;
+    });
+    console.log(t);
     //=====================
     
 
