@@ -161,12 +161,12 @@ function compare(aryClassic, aryHPC){
         return (item.direction === direction);
       });
       if(oc !== undefined){
-        test = (oc.value == classic);
+        test = (oc.value === classic);
         internal.hpc = oc.value;
       }
     }
     else{
-      test = (classic == hpc);
+      test = (classic === hpc);
       internal.hpc = hpc;
     }
     

@@ -13,28 +13,24 @@ var urlFlow = config.url_hpcapi + "flow/id/";
 
 // get all flow id's from custom search API 
 // get legacy contribution id's from list of flow id's
-var customurl = "http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?emergencyID=1899";
+var customurl = "http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?year=2014&organizationabbrev=UNICEF&limit=100000";
 
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?year=2014,2015"; 
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?planid=914";
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?organizationabbrev=Sweden&year=2014";
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?countryISO3=ETH,ERI&year=2014,2015";
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?organizationabbrev=UNICEF&year=2014&globalClustercode=EDU";
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?organizationabbrev=Germany,UNICEF&year=2014"
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?countryISO3=SDN&year=2014,2015";
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?planCode=HSDN15&organizationabbrev=Sudan%20CHF,WFP";
+
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?countryISO3=MMR&year=2015,2016";
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?globalClustercode=EDU&year=2014";
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?organizationabbrev=France&year=2014" ;
+// https://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?organizationabbrev=Germany&year=2015
+//"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?countryISO3=SDN&year=2014";
+// "http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?emergencyID=1846" ;
 //"http://service.stage.hpc.568elmp03.blackmesh.com/v0/public/fts/flow?countryISO3=MMR&year=2013&boundary=incoming&flowstatus=paid,commitment";
-
-/*
-var oCustomAPI = new dto.sourceAPI(customurl);
-var p1 = oCustomAPI.getAPIData()
-.then((jdata)=>{
-  // now parse the json data to get the list of flow id's
-  var oflows = jdata.data.flows;
-  aryContributions = oflows.map((obj)=>{
-    return Number(obj.id);
-  });
-
-  if(jdata.meta.nextLink !== undefined){
-
-  }
-
-  console.log(aryContributions.length);
-  throttle(aryContributions,0,25);
-});
-*/
 
 
 var aryjdata = [];
@@ -65,15 +61,74 @@ customAPI(customurl)
 
   // loop over the flows in the API pages
   aryjdata.forEach((ele,index)=>{
+
+    /* special  to view specific types of flows */
+    let tem = [];
     let aryContributions = ele.data.flows.map((obj)=>{
-      let v = {flowid: Number(obj.id), amt: obj.amountUSD, boundary: obj.boundary}; // in case using solr api and not postgres api, set the amt
+      //if(obj.boundary === "incoming"){
+      // get the original values from the api
+        let v = {flowid: Number(obj.id), boundary: obj.boundary, amt: obj.amountUSD};
+      
+        obj.sourceObjects.forEach((e)=>{ if(e.type==="Location" && e.name === "Japan" ){ v.s = e.name; } });
+        obj.destinationObjects.forEach((e)=>{ if(e.type==="Location" ){ v.d =  e.name; } });
+        if(v.s !== undefined){
+          tem.push(v);
+        }
+      return v;
+      //}
+    });
+    
+
+    /*
+    let total = 0;
+    let out = 0;
+    tem.forEach((e)=>{
+      if(e.boundary === "incoming" || e.boundary === "internal"){
+        total += e.amt;
+      }
+      if(e.boundary === "outgoing"){
+        out += e.amt;
+      }
+    });
+    console.log(`total=${total} and out=${out} and remainder =${total-out} ` ); */
+
+    console.log(tem);
+    console.log(tem.length);   
+    //=====================
+    
+
+    /*============== */
+    // get all
+    /*
+    let aryContributions = ele.data.flows.map((obj)=>{
+      // in case using solr api and not postgres api, get the original values from the api
+      let v = {flowid: Number(obj.id), amt: obj.amountUSD, boundary: obj.boundary, status: obj.status}; 
       return v;
     });
+    */
+
+    // get some only
+    /*
+    let aryContributions = [];
+    ele.data.flows.forEach((obj)=>{ 
+      let b = false; 
+      obj.sourceObjects.forEach((e)=>{  
+        if(e.type==="Location" && e.name === "Japan" ){ b = true;  } 
+      });
+      if(b === true){ 
+        // in case using solr api and not postgres api, get the original values from the api
+        let v = {flowid: Number(obj.id), amt: obj.amountUSD, boundary: obj.boundary, status: obj.status}; 
+        aryContributions.push(v);
+      }
+    });
+
 
     // for each flow record, process
-    console.log(aryContributions.length);
+    console.log("a=" + aryContributions.length);
     let aryResult = [];
-    throttle(aryContributions,0,25, aryResult ,index);
+    throttle(aryContributions,0, 25, aryResult ,index);
+    */
+
   });
 });
 
@@ -124,7 +179,8 @@ function throttle(ary, start, batchsize, aryResults, thread){
 
       let output = "";
       aryResults.forEach((element)=>{
-        output +=   element.legacyId + "," + element.id  + "," + element.amountUSD + "," + element.boundary + "\n";
+        output +=   element.legacyId + "," + element.id  + "," 
+        + element.amountUSD + "," + element.boundary + "," + element.status + "\n";
       });
 
       fs.writeFile(config.localfileOutputPath + thread + "flow.csv", output, (err)=>{
@@ -146,7 +202,7 @@ function throttle(ary, start, batchsize, aryResults, thread){
 
 
 /**
- * to process an array of flows
+ * to process an array of flows to get the legacy id from postgres (add any additional params if needed)
  * 
  * @param {array} flows
  * @param {array} flowSimple
@@ -164,11 +220,12 @@ function processFlows(aryFlows, aryResults){
       let n = dto.flowSimple(jdata.data);
       n.amountUSD = element.amt; // overwrite the amt value in case it is  from the flow public API
       n.boundary = element.boundary;
+      n.status = element.status;
       aryResults.push(n);
       
     })
     .catch(function(err){
-      console.error(err + " ,id = " + element);
+      console.error(err + " ,id = " + element.flowid);
     });  
     aryP.push(p1);
   });

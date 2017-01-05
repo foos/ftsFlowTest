@@ -227,19 +227,19 @@ exports.createFullMapping = function(sourceflow, sourceclassic){
   }
   
   // now do the other way around to check for appeal id's that have matched no plan id's
-  for(let i=0; i<iscl; i++){
-    var f = false;
+  /* for(let i=0; i<iscl; i++){
+    let f = false;
     ary.forEach((mapped)=>{
       if(sourceclassic[i].id === mapped.AppealId){
         f = true;
       }
     });
     if(!f){
-      ary.push(new this.mapAppealToPlan(sourceclassic[i].id, null));
+      //ary.push(new this.mapAppealToPlan(sourceclassic[i].id, null));
       aryFull.push(new this.matrixRow(sourceclassic[i],null));
     }
   }
-  
+  */
   
   return aryFull;
 }
