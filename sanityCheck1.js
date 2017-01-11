@@ -92,30 +92,47 @@ Promise.all([p1,p2,p3,p4])
 .then(values=>{
     //console.log(dataMap.data.funding_by_location[0]);
     // Sanity check on locations first
-    let textOutput1;
+    let setText = setTextForBlock();
+    dataApiCountry.sort((a,b)=>{
+        let a1 = a.name.toLowerCase();
+        let b1 = b.name.toLowerCase();
+        if(a1<b1){return -1;}
+        if(a1>b1){return 1;}
+        return 0;
+    });
+
     dataApiCountry.forEach((val)=>{ 
         let mv = "missing";
         dataMap.data.funding_by_location.forEach((mapitem)=>{ 
             if(mapitem.location_id === val.id){ mv = mapitem;}
         });
 
-        if(mv === "missing"){
-            textOutput1 += val.name + " " + val.totalFunding + " missing in map" + "\n";
+        if(mv === "missing"){            
+            setText(val.name + " " + val.totalFunding + " missing in map");
         }
         else{
-            if(mv.total_funding !== val.totalFunding){ 
-                textOutput1 += val.name + ` error map=${mv.total_funding} vs api=${val.totalFunding}` + "\n";
+            if(mv.total_funding !== val.totalFunding){               
+                setText(val.name + ` error map=${mv.total_funding} vs api=${val.totalFunding}`);
             }
-            else{ textOutput1 += val.name + " OK " + val.totalFunding + "\n";}
+            else{                
+                setText(val.name + " OK " + val.totalFunding);
+            }
         }
         
     });
     console.log("done 1");
-    printToFile(textOutput1,1);
+    printToFile(setText(),1);
 
 
     // Sanity check on donor 
-    textOutput1 = "";
+    setText = setTextForBlock();
+    dataApiDonor.sort((a,b)=>{
+        let a1 = a.name.toLowerCase();
+        let b1 = b.name.toLowerCase();
+        if(a1<b1){return -1;}
+        if(a1>b1){return 1;}
+        return 0;
+    });
     dataApiDonor.forEach((val)=>{ 
         let mv = "missing";
         dataMap.data.funding_by_donor.forEach((mapitem)=>{ 
@@ -123,21 +140,29 @@ Promise.all([p1,p2,p3,p4])
         });
 
         if(mv === "missing"){
-            textOutput1 += val.name + " " + val.totalFunding + " missing in map" + "\n";
+            setText(val.name + " " + val.totalFunding + " missing in map");
         }
         else{
             if(mv.total_funding !== val.totalFunding){ 
-                textOutput1 += val.name + ` error map=${mv.total_funding} vs api=${val.totalFunding}` + "\n";
+                setText(val.name + ` error map=${mv.total_funding} vs api=${val.totalFunding}`);
             }
-            else{ textOutput1 += val.name + " OK " + val.totalFunding + "\n";}
+            else{ setText(val.name + " OK " + val.totalFunding);}
         }
         
     });
     console.log("done 2");
-    printToFile(textOutput1,2);
+    printToFile(setText(),2);
 
     // sanity check on plan
-    textOutput1 = "";
+    setText = setTextForBlock();
+    dataApiPlan.sort((a,b)=>{
+        let a1 = a.name.toLowerCase();
+        let b1 = b.name.toLowerCase();
+        if(a1<b1){return -1;}
+        if(a1>b1){return 1;}
+        return 0;
+    });
+
     dataApiPlan.forEach((val)=>{ 
         let mv = "missing";
         dataMap.data.funding_by_plan.forEach((mapitem)=>{ 
@@ -145,26 +170,42 @@ Promise.all([p1,p2,p3,p4])
         });
 
         if(mv === "missing"){
-            textOutput1 += val.name + " " + val.funding + " missing in map" + "\n";
+            setText(val.name + " " + val.funding + " missing in map");
         }
         else{
             if(mv.total_funding !== val.funding){ 
-                textOutput1 += val.name + ` error map=${mv.total_funding} vs api=${val.funding}` + "\n";
+                setText(val.name + ` error map=${mv.total_funding} vs api=${val.funding}`);
             }
-            else{ textOutput1 += val.name + " OK " + val.funding + "\n";}
+            else{ setText(val.name + " OK " + val.funding);}
         }
         
     });
     console.log("done 3");
-    printToFile(textOutput1,3);
+    printToFile(setText(),3);
 
 })
 
 
 
-// function print out
+/**
+ * Helper function to print to file
+ * @param {string} text - the text to print to file
+ * @param {string} v - the string to append to the end of the file 
+ */
 function printToFile(text,v){
     fs.writeFile(config.localfileOutputPath  + "sanityMap" + v + ".txt", text, (err)=>{
           if(err){ console.error(err);}
     });
 }
+
+/**
+ * function to set the text to print. Semi-Curry function.
+ */
+function setTextForBlock(){
+    var innerText = "";
+    return function(additionalText){
+        innerText += " " + additionalText + "\n\r";
+        return innerText;
+    }
+}
+
